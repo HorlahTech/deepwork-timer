@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:untitled/countdown_brain.dart';
+import 'package:untitled/time_model.dart';
 // import 'package:percent_indicator/percent_indicator.dart';
 void main() {
   runApp(const MyApp());
@@ -34,7 +36,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
+  final CountdownBrain _countdownBrain = CountdownBrain();
 
   @override
   Widget build(BuildContext context) {
@@ -50,19 +52,27 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
           children: <Widget>[
-           const Row(children: [
-             MyAppButton(color:Color(0xff009688) , text: "Work",),
+            Row(children: [
+             MyAppButton(color:const Color(0xff009688) , text: "Work",onPressed: (){
+              _countdownBrain.startWork();
+             },),
           
-          SizedBox(width: 10) ,  MyAppButton(color:Color(0xff607D8B) , text: "Short Break", ),
-         SizedBox(width: 10) ,       MyAppButton(color:Color(0xff455A64) , text: "long Break",),
+          const SizedBox(width: 10) ,   MyAppButton(color:Color(0xff607D8B) , text: "Short Break",onPressed: (){}, ),
+         const SizedBox(width: 10) ,        MyAppButton(color:Color(0xff455A64) , text: "long Break",onPressed: (){},),
            ],),
-           CircularPercentIndicator(
+       
+           StreamBuilder<TimerModel>(
+            initialData:TimerModel(percent: 1, time: "00:00"),
+            stream: _countdownBrain.countDownBrain(), builder: (context, snapshot){
+return     CircularPercentIndicator(
                   radius: 80.0,
                   lineWidth: 8.0,
-                  percent: 1.0,
-                  center:  const Text("30:00", style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),),
+                  percent: snapshot.data?.percent??0,
+                  center:   Text(snapshot.data?.time??'', style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w600),),
                   progressColor:const Color(0xff009688),
-                ),
+                );
+       
+            }),
                 const Row(children: [
              MyAppButton(color:Color(0xff455A64), text: "Stop",),
           
@@ -87,6 +97,6 @@ final String text;
 final void Function()? onPressed;
   @override
   Widget build(BuildContext context) {
-    return Expanded(child: MaterialButton(onPressed: () {  },color: color ,child:   Text(text, style: const TextStyle(color: Colors.white),),));
+    return Expanded(child: MaterialButton(onPressed: onPressed,color: color ,child:   Text(text, style: const TextStyle(color: Colors.white),),));
   }
 }
